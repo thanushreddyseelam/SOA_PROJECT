@@ -1,0 +1,36 @@
+$kind: http-request
+description: Rider requests a ride. Automatically matches an available driver.
+url: "{{baseUrl}}/rides"
+method: POST
+headers:
+  Authorization: Bearer {{riderToken}}
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "riderId": {{riderId}},
+      "pickupLocation": "Market St & 4th St, San Francisco",
+      "dropoffLocation": "Fisherman's Wharf, San Francisco",
+      "pickupLatitude": 37.7749,
+      "pickupLongitude": -122.4194,
+      "dropoffLatitude": 37.8080,
+      "dropoffLongitude": -122.4177,
+      "vehicleType": "SEDAN",
+      "paymentMethod": "CREDIT_CARD"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK or 201 Created", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Ride created with REQUESTED or MATCHED status", function () {
+          pm.expect(jsonData.status).to.be.oneOf(["REQUESTED", "MATCHED", "DRIVER_ASSIGNED"]);
+      });
+      if (jsonData.id) {
+          pm.environment.set("rideId", jsonData.id);
+      }
+    language: text/javascript
+order: 1000

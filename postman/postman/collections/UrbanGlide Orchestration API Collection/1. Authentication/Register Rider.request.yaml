@@ -1,0 +1,30 @@
+$kind: http-request
+description: Registers a new rider. Role defaults securely to RIDER.
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "rider_john",
+      "email": "rider.john@example.com",
+      "password": "rider123",
+      "phoneNumber": "+15551234567"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK or 201 Created", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+      var jsonData = pm.response.json();
+      pm.test("User registered with RIDER role", function () {
+          pm.expect(jsonData.role).to.eql("RIDER");
+      });
+      if (jsonData.userId) {
+          pm.environment.set("riderId", jsonData.userId);
+      }
+    language: text/javascript
+order: 1000

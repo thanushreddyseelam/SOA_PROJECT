@@ -1,0 +1,6 @@
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (1, 'Raju', '9876543210', 'AP16AB1234', 'SEDAN', 16.5062, 80.6480, true, 'AVAILABLE');
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (2, 'Siva', '9876543211', 'AP16BC2345', 'SUV', 16.5193, 80.6305, true, 'AVAILABLE');
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (3, 'Kiran', '9876543212', 'AP16CD3456', 'HATCHBACK', 16.4983, 80.6711, true, 'AVAILABLE');
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (4, 'Ravi', '9876543213', 'AP16DE4567', 'AUTO', 16.5087, 80.6218, false, 'BUSY');
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (5, 'Hari', '9876543214', 'AP16EF5678', 'SEDAN', 16.5242, 80.6530, true, 'AVAILABLE');
+INSERT IGNORE INTO drivers (id, name, phone, vehicle_number, vehicle_type, latitude, longitude, availability, status) VALUES (6, 'Driver Dave', '+15559876543', 'DL-998877', 'SEDAN', 37.7749, -122.4194, true, 'AVAILABLE');

@@ -1,0 +1,6 @@
+$kind: collection
+description: Comprehensive E2E and Role-Based Security Verification Collection for UrbanGlide Microservices Architecture via Spring Cloud API Gateway (Port 8080).
+variables:
+  - key: bearer_token_13t6
+    secret: true
+    disabled: false

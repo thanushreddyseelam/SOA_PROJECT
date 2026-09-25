@@ -1,0 +1,28 @@
+$kind: http-request
+description: Authenticates administrator and retrieves JWT with ADMIN role claim.
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "admin",
+      "password": "admin123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Returned role is ADMIN", function () {
+          pm.expect(jsonData.role).to.eql("ADMIN");
+      });
+      if (jsonData.token) {
+          pm.environment.set("adminToken", jsonData.token);
+      }
+    language: text/javascript
+order: 5000

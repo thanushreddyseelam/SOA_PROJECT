@@ -1,0 +1,17 @@
+$kind: http-request
+name: "Security Test - Wrong Role: Rider Calling Driver Accept (Expect 403)"
+description: Verifies that a Rider cannot call Driver-restricted endpoints (403 Forbidden).
+url: "{{baseUrl}}/rides/{{rideId}}/accept?driverId={{driverId}}"
+method: PUT
+headers:
+  Authorization: Bearer {{riderToken}}
+queryParams:
+  driverId: "{{driverId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 403 Forbidden", function () {
+          pm.response.to.have.status(403);
+      });
+    language: text/javascript
+order: 3000

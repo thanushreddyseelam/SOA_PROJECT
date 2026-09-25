@@ -1,0 +1,18 @@
+$kind: http-request
+description: Retrieves list of all currently available drivers.
+url: "{{baseUrl}}/drivers/available"
+method: GET
+headers:
+  Authorization: Bearer {{riderToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Drivers array returned", function () {
+          pm.expect(Array.isArray(jsonData)).to.be.true;
+      });
+    language: text/javascript
+order: 3000

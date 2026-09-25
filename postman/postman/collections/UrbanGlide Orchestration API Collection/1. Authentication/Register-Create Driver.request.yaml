@@ -1,0 +1,30 @@
+$kind: http-request
+description: Registers a new driver in Driver Service.
+url: "{{baseUrl}}/drivers"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Driver Dave",
+      "email": "driver.dave@example.com",
+      "phone": "+15559876543",
+      "licenseNumber": "DL-998877",
+      "vehicleType": "SEDAN",
+      "latitude": 37.7749,
+      "longitude": -122.4194
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK or 201 Created", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+      var jsonData = pm.response.json();
+      if (jsonData.id) {
+          pm.environment.set("driverId", jsonData.id);
+      }
+    language: text/javascript
+order: 3000

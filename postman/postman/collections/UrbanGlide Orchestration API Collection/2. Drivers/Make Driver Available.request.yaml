@@ -1,0 +1,20 @@
+$kind: http-request
+description: Updates driver status to AVAILABLE.
+url: "{{baseUrl}}/drivers/{{driverId}}/status?status=AVAILABLE"
+method: PUT
+headers:
+  Authorization: Bearer {{driverToken}}
+queryParams:
+  status: AVAILABLE
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Driver is AVAILABLE", function () {
+          pm.expect(jsonData.status).to.eql("AVAILABLE");
+      });
+    language: text/javascript
+order: 1000

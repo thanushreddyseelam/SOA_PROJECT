@@ -1,0 +1,210 @@
+version: '3.8'
+
+# ============================================
+# UrbanGlide - Docker Compose Configuration
+# ============================================
+# Start all services: docker-compose up --build
+# Stop all services:  docker-compose down
+# View logs:          docker-compose logs -f <service-name>
+
+networks:
+  urbanglide-network:
+    driver: bridge
+
+services:
+
+  # ============================================
+  # Infrastructure: MySQL Database
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: urbanglide-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: urbanglide
+      MYSQL_PASSWORD: urbanglide123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Service Registry: Eureka Server
+  # ============================================
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: urbanglide-eureka
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Auth Service
+  # ============================================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: urbanglide-auth
+    ports:
+      - "8090:8090"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/urban_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=urbanglide
+      - SPRING_DATASOURCE_PASSWORD=urbanglide123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=dXJiYW5nbGlkZS1zZWNyZXQta2V5LWZvci1qd3QtYXV0aGVudGljYXRpb24tc3VwZXItc2VjdXJl
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Driver Service - Instance 1
+  # ============================================
+  driver-service-1:
+    build:
+      context: ./driver-service
+      dockerfile: Dockerfile
+    container_name: urbanglide-driver-1
+    ports:
+      - "8087:8087"
+    environment:
+      - SERVER_PORT=8087
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/urban_driver_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=urbanglide
+      - SPRING_DATASOURCE_PASSWORD=urbanglide123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Driver Service - Instance 2 (Load Balancing Demo)
+  # ============================================
+  driver-service-2:
+    build:
+      context: ./driver-service
+      dockerfile: Dockerfile
+    container_name: urbanglide-driver-2
+    ports:
+      - "8089:8089"
+    environment:
+      - SERVER_PORT=8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/urban_driver_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=urbanglide
+      - SPRING_DATASOURCE_PASSWORD=urbanglide123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Ride Service
+  # ============================================
+  ride-service:
+    build:
+      context: ./ride-service
+      dockerfile: Dockerfile
+    container_name: urbanglide-ride
+    ports:
+      - "8086:8086"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/urban_ride_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=urbanglide
+      - SPRING_DATASOURCE_PASSWORD=urbanglide123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # Payment Service
+  # ============================================
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: urbanglide-payment
+    ports:
+      - "8088:8088"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/urban_payment_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=urbanglide
+      - SPRING_DATASOURCE_PASSWORD=urbanglide123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbanglide-network
+
+  # ============================================
+  # API Gateway
+  # ============================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: urbanglide-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - JWT_SECRET=dXJiYW5nbGlkZS1zZWNyZXQta2V5LWZvci1qd3QtYXV0aGVudGljYXRpb24tc3VwZXItc2VjdXJl
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      ride-service:
+        condition: service_started
+      driver-service-1:
+        condition: service_started
+      payment-service:
+        condition: service_started
+    networks:
+      - urbanglide-network

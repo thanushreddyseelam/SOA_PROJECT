@@ -1,0 +1,18 @@
+$kind: http-request
+description: Driver starts the trip.
+url: "{{baseUrl}}/rides/{{rideId}}/start"
+method: PUT
+headers:
+  Authorization: Bearer {{driverToken}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Ride status is IN_PROGRESS", function () {
+          pm.expect(jsonData.status).to.be.oneOf(["IN_PROGRESS", "TRIP_STARTED"]);
+      });
+    language: text/javascript
+order: 3000

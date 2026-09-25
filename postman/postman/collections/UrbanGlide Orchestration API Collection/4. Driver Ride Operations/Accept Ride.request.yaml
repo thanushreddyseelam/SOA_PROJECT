@@ -1,0 +1,20 @@
+$kind: http-request
+description: Driver accepts the dispatched ride request.
+url: "{{baseUrl}}/rides/{{rideId}}/accept?driverId={{driverId}}"
+method: PUT
+headers:
+  Authorization: Bearer {{driverToken}}
+queryParams:
+  driverId: "{{driverId}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Ride status is ACCEPTED", function () {
+          pm.expect(jsonData.status).to.be.oneOf(["ACCEPTED", "DRIVER_ACCEPTED"]);
+      });
+    language: text/javascript
+order: 1000

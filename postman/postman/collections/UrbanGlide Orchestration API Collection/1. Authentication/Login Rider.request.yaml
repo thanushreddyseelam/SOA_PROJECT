@@ -1,0 +1,31 @@
+$kind: http-request
+description: Authenticates a rider and retrieves a JWT with RIDER role claim.
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "rider_john",
+      "password": "rider123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      var jsonData = pm.response.json();
+      pm.test("Returned role is RIDER", function () {
+          pm.expect(jsonData.role).to.eql("RIDER");
+      });
+      if (jsonData.token) {
+          pm.environment.set("riderToken", jsonData.token);
+      }
+      if (jsonData.userId) {
+          pm.environment.set("riderId", jsonData.userId);
+      }
+    language: text/javascript
+order: 2000

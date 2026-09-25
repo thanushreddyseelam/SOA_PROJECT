@@ -1,0 +1,939 @@
+{
+	"info": {
+		"_postman_id": "8f2a1a0c-55c3-4d7a-8f4b-70c8a6b1293e",
+		"name": "UrbanGlide Orchestration API Collection",
+		"description": "Comprehensive E2E and Role-Based Security Verification Collection for UrbanGlide Microservices Architecture via Spring Cloud API Gateway (Port 8080).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "1. Login Admin (Do First to get Admin Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Returned role is ADMIN\", function () {",
+									"    pm.expect(jsonData.role).to.eql(\"ADMIN\");",
+									"});",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"adminToken\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates administrator and retrieves JWT with ADMIN role claim."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Register Rider (Public)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"User registered with RIDER role\", function () {",
+									"    pm.expect(jsonData.role).to.eql(\"RIDER\");",
+									"});",
+									"if (jsonData.userId) {",
+									"    pm.environment.set(\"riderId\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"rider_john\",\n  \"email\": \"rider.john@example.com\",\n  \"password\": \"rider123\",\n  \"phoneNumber\": \"+15551234567\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new rider. Role defaults securely to RIDER."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Login Rider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Returned role is RIDER\", function () {",
+									"    pm.expect(jsonData.role).to.eql(\"RIDER\");",
+									"});",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"riderToken\", jsonData.token);",
+									"}",
+									"if (jsonData.userId) {",
+									"    pm.environment.set(\"riderId\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"rider_john\",\n  \"password\": \"rider123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates a rider and retrieves a JWT with RIDER role claim."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Register Driver (Public /auth/register-driver)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Returned role is DRIVER\", function () {",
+									"    pm.expect(jsonData.role).to.eql(\"DRIVER\");",
+									"});",
+									"if (jsonData.userId) {",
+									"    pm.environment.set(\"driverId\", jsonData.userId);",
+									"}",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"driverToken\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"driver_dave\",\n  \"email\": \"driver.dave@example.com\",\n  \"password\": \"driver123\",\n  \"phoneNumber\": \"+15559876543\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register-driver",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register-driver"
+							]
+						},
+						"description": "Registers a new driver user in Auth Service with DRIVER role. Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Login Driver",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Returned role is DRIVER\", function () {",
+									"    pm.expect(jsonData.role).to.eql(\"DRIVER\");",
+									"});",
+									"if (jsonData.userId) {",
+									"    pm.environment.set(\"driverId\", jsonData.userId);",
+									"}",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"driverToken\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"driver_dave\",\n  \"password\": \"driver123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates driver and retrieves JWT with DRIVER role claim."
+					},
+					"response": []
+				},
+				{
+					"name": "6. Create Driver Profile in Fleet (/drivers)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"driverId\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Driver Dave\",\n  \"phone\": \"+15559876543\",\n  \"vehicleNumber\": \"DL-998877\",\n  \"vehicleType\": \"SEDAN\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers"
+							]
+						},
+						"description": "Registers a new driver vehicle & profile in Driver Service fleet using Admin Token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Drivers",
+			"item": [
+				{
+					"name": "Make Driver Available",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Driver is AVAILABLE\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"AVAILABLE\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"AVAILABLE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers/{{driverId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								"{{driverId}}",
+								"status"
+							]
+						},
+						"description": "Updates driver status to AVAILABLE."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Driver Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 37.7750,\n  \"longitude\": -122.4190\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers/{{driverId}}/location",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								"{{driverId}}",
+								"location"
+							]
+						},
+						"description": "Updates driver real-time GPS coordinates."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Drivers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Drivers array returned\", function () {",
+									"    pm.expect(Array.isArray(jsonData)).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{riderToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/available",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								"available"
+							]
+						},
+						"description": "Retrieves list of all currently available drivers."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Rider Rides",
+			"item": [
+				{
+					"name": "Create Ride",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK or 201 Created\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride created with REQUESTED or MATCHED status\", function () {",
+									"    pm.expect(jsonData.status).to.be.oneOf([\"REQUESTED\", \"MATCHED\"]);",
+									"});",
+									"if (jsonData.id) {",
+									"    pm.environment.set(\"rideId\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{riderToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"riderId\": {{riderId}},\n  \"pickupLocation\": \"Market St & 4th St, San Francisco\",\n  \"dropoffLocation\": \"Fisherman's Wharf, San Francisco\",\n  \"pickupLatitude\": 37.7749,\n  \"pickupLongitude\": -122.4194,\n  \"dropoffLatitude\": 37.8080,\n  \"dropoffLongitude\": -122.4177,\n  \"vehicleType\": \"SEDAN\",\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rides",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides"
+							]
+						},
+						"description": "Rider requests a ride. Automatically matches an available driver."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ride Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride ID matches\", function () {",
+									"    pm.expect(jsonData.id.toString()).to.eql(pm.environment.get(\"rideId\").toString());",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{riderToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}"
+							]
+						},
+						"description": "Retrieves the full details and live status of a ride."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Driver Ride Operations",
+			"item": [
+				{
+					"name": "Accept Ride",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride status is ACCEPTED\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"ACCEPTED\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}/accept?driverId={{driverId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}",
+								"accept"
+							],
+							"query": [
+								{
+									"key": "driverId",
+									"value": "{{driverId}}"
+								}
+							]
+						},
+						"description": "Driver accepts the dispatched ride request."
+					},
+					"response": []
+				},
+				{
+					"name": "Driver Arrived",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride status is ARRIVED\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"ARRIVED\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}/arrive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}",
+								"arrive"
+							]
+						},
+						"description": "Driver marks arrival at rider pickup location."
+					},
+					"response": []
+				},
+				{
+					"name": "Start Ride",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride status is IN_PROGRESS\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"IN_PROGRESS\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}/start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}",
+								"start"
+							]
+						},
+						"description": "Driver starts the trip."
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Ride",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Ride status is COMPLETED\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"COMPLETED\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}/complete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}",
+								"complete"
+							]
+						},
+						"description": "Driver completes the trip. Triggers automatic payment processing via Payment Service."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Payments",
+			"item": [
+				{
+					"name": "Check Payment for Ride",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Payment status is SUCCESS or COMPLETED\", function () {",
+									"    pm.expect(jsonData.status).to.be.oneOf([\"SUCCESS\", \"COMPLETED\", \"PENDING\"]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{riderToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments/ride/{{rideId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								"ride",
+								"{{rideId}}"
+							]
+						},
+						"description": "Queries payment record associated with completed ride."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Security Tests",
+			"item": [
+				{
+					"name": "Security Test - No JWT (Expect 401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rides/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"1"
+							]
+						},
+						"description": "Verifies that unauthenticated requests to protected endpoints return 401."
+					},
+					"response": []
+				},
+				{
+					"name": "Security Test - Invalid JWT (Expect 401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid.fake.token"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"1"
+							]
+						},
+						"description": "Verifies that malformed or invalid tokens are rejected with 401."
+					},
+					"response": []
+				},
+				{
+					"name": "Security Test - Wrong Role: Rider Calling Driver Accept (Expect 403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{riderToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/{{rideId}}/accept?driverId={{driverId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								"{{rideId}}",
+								"accept"
+							],
+							"query": [
+								{
+									"key": "driverId",
+									"value": "{{driverId}}"
+								}
+							]
+						},
+						"description": "Verifies that a Rider cannot call Driver-restricted endpoints (403 Forbidden)."
+					},
+					"response": []
+				},
+				{
+					"name": "Security Test - Wrong Role: Driver Calling Create Ride (Expect 403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{driverToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"riderId\": 1,\n  \"pickupLocation\": \"Market St\",\n  \"dropoffLocation\": \"Wharf\",\n  \"pickupLatitude\": 37.7749,\n  \"pickupLongitude\": -122.4194,\n  \"dropoffLatitude\": 37.8080,\n  \"dropoffLongitude\": -122.4177,\n  \"vehicleType\": \"SEDAN\",\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rides",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides"
+							]
+						},
+						"description": "Verifies that a Driver cannot book a ride on behalf of riders (403 Forbidden)."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
